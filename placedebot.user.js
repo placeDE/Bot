@@ -360,7 +360,7 @@ async function getCurrentImageUrl(id = '0') {
  * @param {HTMLCanvasElement} canvas 
  * @param {number} x 
  * @param {number} y 
- * @returns 
+ * @returns {Promise<CanvasRenderingContext2D>}
  */
 function getCanvasFromUrl(url, canvas, x = 0, y = 0) {
 	return new Promise((resolve, reject) => {
