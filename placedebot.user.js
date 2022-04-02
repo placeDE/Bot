@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PlaceDE Bot
 // @namespace    https://github.com/PlaceDE/Bot
-// @version      1.0.10
+// @version      1.0.12
 // @description  /r/place bot
 // @author       NoahvdAa, reckter, SgtChrome, nama17
 // @match        https://www.reddit.com/r/place/*
@@ -21,7 +21,9 @@ var placeOrders = [];
 var accessToken;
 var canvas = document.createElement('canvas');
 
-const VERSION = 10
+var TOAST_ENABLED = true;
+
+const VERSION = "1.0.12";
 var UPDATE_PENDING = false;
 
 const COLOR_MAPPINGS = {
@@ -58,6 +60,14 @@ const COLOR_MAPPINGS = {
 		text: 'Zugriffstoken eingesammelt!',
 		duration: 10000
 	}).showToast();
+	Toastify({
+		text: 'Klicke hier, um alle standardmäßigen Benachrichtigungen auszuschalten',
+		duration: -1, // Für immer
+		close: true, // Kann weggeklickt werden
+		onClick: () => {
+			TOAST_ENABLED = false;
+		}
+	})
 
 	setInterval(updateOrders, 5 * 60 * 1000); // Update orders elke vijf minuten.
 	await updateOrders();
@@ -109,10 +119,13 @@ async function attemptPlace() {
 		// Pixel already set
 		if (currentColorId == colorId) continue;
 
-		Toastify({
-			text: `Pixel wird gesetzt auf ${x}, ${y}...`,
-			duration: 10000
-		}).showToast();
+		if (TOAST_ENABLED) {
+			Toastify({
+				text: `Pixel wird gesetzt auf ${x}, ${y}...`,
+				duration: 10000
+			}).showToast();
+		}
+			
 		const nextAvailablePixelTimestamp = await place(x, y, colorId) ?? new Date(Date.now().valueOf() + 1000 * 60 * 5 + 1000 * 15)
 
 		// Add a few random seconds to the next available pixel timestamp
@@ -120,18 +133,23 @@ async function attemptPlace() {
 
 		const minutes = Math.floor(waitFor / (1000 * 60))
 		const seconds = Math.floor((waitFor / 1000) % 60)
-		Toastify({
-			text: `Warten auf Abkühlzeit ${minutes}:${seconds} bis ${new Date(nextAvailablePixelTimestamp).toLocaleTimeString()}`,
-			duration: waitFor
-		}).showToast();
+		if (TOAST_ENABLED) {
+			Toastify({
+				text: `Warten auf Abkühlzeit ${minutes}:${seconds} bis ${new Date(nextAvailablePixelTimestamp).toLocaleTimeString()}`,
+				duration: waitFor
+			}).showToast();
+		}
+		
 		setTimeout(attemptPlace, waitFor); // 5min en 15sec, just to be safe.
 		return;
 	}
-
-	Toastify({
-		text: 'Alle bestellten Pixel haben bereits die richtige Farbe!',
-		duration: 10000
-	}).showToast();
+	if (TOAST_ENABLED) {
+		Toastify({
+			text: 'Alle bestellten Pixel haben bereits die richtige Farbe!',
+			duration: 10000
+		}).showToast();
+	}
+	
 	setTimeout(attemptPlace, 30000); // probeer opnieuw in 30sec.
 }
 
@@ -146,13 +164,16 @@ function updateOrders() {
 			for (const structureName in data.structures) {
 				pixelCount += data.structures[structureName].pixels.length;
 			}
-			Toastify({
-				text: `Neue Strukturen geladen. Bilder: ${structureCount} - Pixels: ${pixelCount}.`,
-				duration: 10000
-			}).showToast();
+			if (TOAST_ENABLED) {
+				Toastify({
+					text: `Neue Strukturen geladen. Bilder: ${structureCount} - Pixels: ${pixelCount}.`,
+					duration: 10000
+				}).showToast();
+			}
+			
 		}
 
-		if (data?.version !== VERSION && !UPDATE_PENDING) {
+		if (data?.version != VERSION && !UPDATE_PENDING) {
 			UPDATE_PENDING = true
 			Toastify({
 				text: `NEUE VERSION VERFÜGBAR! Aktualisiere hier https://github.com/placeDE/Bot/raw/main/placedebot.user.js`,
