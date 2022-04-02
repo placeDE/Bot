@@ -52,17 +52,8 @@ const COLOR_MAPPINGS = {
 	canvas = document.body.appendChild(canvas);
 
 	Toastify({
-		text: 'Abfrage des Zugriffstokens...',
-		duration: 10000
-	}).showToast();
-	accessToken = await getAccessToken();
-	Toastify({
-		text: 'Zugriffstoken eingesammelt!',
-		duration: 10000
-	}).showToast();
-	Toastify({
 		text: 'Klicke hier, um alle unbedenklichen Nachrichten zu unterdrücken (z.B. "Platziere Pixel", etc.)',
-		duration: -1,
+		duration: 60 * 1000, // eine Minute
 		close: true,
 		onClick: () => {
 			Toastify({
@@ -70,6 +61,15 @@ const COLOR_MAPPINGS = {
 			}).showToast();
 			DEFAULT_TOASTS_ENABLED = false;
 		}
+	}).showToast();
+	Toastify({
+		text: 'Abfrage des Zugriffstokens...',
+		duration: 10000
+	}).showToast();
+	accessToken = await getAccessToken();
+	Toastify({
+		text: 'Zugriffstoken eingesammelt!',
+		duration: 10000
 	}).showToast();
 
 	setInterval(updateOrders, 5 * 60 * 1000); // Update orders elke vijf minuten.
