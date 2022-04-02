@@ -260,9 +260,7 @@ async function getAccessToken() {
 	const url = usingOldReddit ? 'https://new.reddit.com/r/place/' : 'https://www.reddit.com/r/place/';
 	const response = await fetch(url);
 	const responseText = await response.text();
-
-	// TODO: ew
-	return responseText.split('\"accessToken\":\"')[1].split('"')[0];
+	return responseText.match(/"accessToken"\s*:\s*"([\w-]+)"/)[1];
 }
 
 async function getCurrentImageUrl() {
