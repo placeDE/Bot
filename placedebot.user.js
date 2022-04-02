@@ -52,7 +52,7 @@ const COLOR_MAPPINGS = {
 
 (async function () {
 	GM_addStyle(GM_getResourceText('TOASTIFY_CSS'));
-	canvas.width = 1000;
+	canvas.width = 2000;
 	canvas.height = 1000;
 	canvas = document.body.appendChild(canvas);
 
