@@ -17,7 +17,11 @@
 
 // Sorry voor de rommelige code, haast en clean gaatn iet altijd samen ;)
 
+/**
+ * @type {{version: number, structures: {[key:string]: {priority: number, pixels: [{x: number, y: number, color: number, priority: number}]}}, priorities: number[]}}
+ */
 var placeOrders = [];
+/** @type {string} */
 var accessToken;
 var canvas = document.createElement('canvas');
 
@@ -72,6 +76,10 @@ const COLOR_MAPPINGS = {
 	attemptPlace();
 })();
 
+/**
+ * 
+ * @param {{[key: string]: any, priority: number, rndPriority: number}[]} array 
+ */
 function shuffleWeighted(array) {
 	for (const item of array) {
 		item.rndPriority = Math.round(placeOrders.priorities[item.priority] * Math.random());
@@ -196,9 +204,9 @@ function updateOrders() {
 
 /**
  * Places a pixel on the canvas, returns the "nextAvailablePixelTimestamp", if succesfull
- * @param x
- * @param y
- * @param color
+ * @param {number} x
+ * @param {number} y
+ * @param {number} color
  * @returns {Promise<number>}
  */
 async function place(x, y, color) {
@@ -263,6 +271,10 @@ async function place(x, y, color) {
 	return data?.data?.act?.data?.[0]?.data?.nextAvailablePixelTimestamp
 }
 
+/**
+ * 
+ * @returns {string}
+ */
 async function getAccessToken() {
 	const usingOldReddit = window.location.href.includes('new.reddit.com');
 	const url = usingOldReddit ? 'https://new.reddit.com/r/place/' : 'https://www.reddit.com/r/place/';
@@ -273,6 +285,11 @@ async function getAccessToken() {
 	return responseText.split('\"accessToken\":\"')[1].split('"')[0];
 }
 
+/**
+ * 
+ * @param {string} id 
+ * @returns {string}
+ */
 async function getCurrentImageUrl(id = '0') {
 	return new Promise((resolve, reject) => {
 		const ws = new WebSocket('wss://gql-realtime-2.reddit.com/query', 'graphql-ws');
@@ -337,6 +354,14 @@ async function getCurrentImageUrl(id = '0') {
 	});
 }
 
+/**
+ * 
+ * @param {string} url 
+ * @param {HTMLCanvasElement} canvas 
+ * @param {number} x 
+ * @param {number} y 
+ * @returns 
+ */
 function getCanvasFromUrl(url, canvas, x = 0, y = 0) {
 	return new Promise((resolve, reject) => {
 		var ctx = canvas.getContext('2d');
@@ -351,6 +376,13 @@ function getCanvasFromUrl(url, canvas, x = 0, y = 0) {
 	});
 }
 
+/**
+ * 
+ * @param {number} r 
+ * @param {number} g 
+ * @param {number} b 
+ * @returns {string}
+ */
 function rgbToHex(r, g, b) {
 	return '#' + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).toUpperCase();
 }
