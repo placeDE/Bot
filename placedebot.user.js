@@ -50,7 +50,6 @@ const COLOR_MAPPINGS = {
 	canvas.width = 1000;
 	canvas.height = 1000;
 	canvas = document.body.appendChild(canvas);
-
 	Toastify({
 		text: 'Abfrage des Zugriffstokens...',
 		duration: 10000
@@ -118,37 +117,39 @@ async function attemptPlace() {
 		const currentColorId = COLOR_MAPPINGS[hex];
 		// Pixel already set
 		if (currentColorId == colorId) continue;
+    
+		Toastify({
+			text: `Pixel wird gesetzt auf ${x}, ${y}...`,
+			duration: 10000
+		}).showToast();
 
-		if (TOAST_ENABLED) {
-			Toastify({
-				text: `Pixel wird gesetzt auf ${x}, ${y}...`,
-				duration: 10000
-			}).showToast();
+		const time = new Date().getTime();
+		let nextAvailablePixelTimestamp = await place(x, y, colorId) ?? new Date(time + 1000 * 60 * 5 + 1000 * 15)
+
+		// Sanity check timestamp
+		if (nextAvailablePixelTimestamp < time || nextAvailablePixelTimestamp > time + 1000 * 60 * 5 + 1000 * 15) {
+			nextAvailablePixelTimestamp = time + 1000 * 60 * 5 + 1000 * 15;
 		}
-			
-		const nextAvailablePixelTimestamp = await place(x, y, colorId) ?? new Date(Date.now().valueOf() + 1000 * 60 * 5 + 1000 * 15)
 
 		// Add a few random seconds to the next available pixel timestamp
-		const waitFor = nextAvailablePixelTimestamp - Date.now() + (Math.random() * 1000 * 15);
+		const waitFor = nextAvailablePixelTimestamp - time + (Math.random() * 1000 * 15);
 
 		const minutes = Math.floor(waitFor / (1000 * 60))
 		const seconds = Math.floor((waitFor / 1000) % 60)
-		if (TOAST_ENABLED) {
-			Toastify({
-				text: `Warten auf Abkühlzeit ${minutes}:${seconds} bis ${new Date(nextAvailablePixelTimestamp).toLocaleTimeString()}`,
-				duration: waitFor
-			}).showToast();
-		}
-		
-		setTimeout(attemptPlace, waitFor); // 5min en 15sec, just to be safe.
+
+		Toastify({
+			text: `Warten auf Abkühlzeit ${minutes}:${seconds} bis ${new Date(nextAvailablePixelTimestamp).toLocaleTimeString()}`,
+			duration: waitFor
+		}).showToast();
+		setTimeout(attemptPlace, waitFor);
+
 		return;
 	}
-	if (TOAST_ENABLED) {
-		Toastify({
-			text: 'Alle bestellten Pixel haben bereits die richtige Farbe!',
-			duration: 10000
-		}).showToast();
-	}
+
+  Toastify({
+    text: 'Alle bestellten Pixel haben bereits die richtige Farbe!',
+    duration: 10000
+  }).showToast();
 	
 	setTimeout(attemptPlace, 30000); // probeer opnieuw in 30sec.
 }
@@ -164,12 +165,12 @@ function updateOrders() {
 			for (const structureName in data.structures) {
 				pixelCount += data.structures[structureName].pixels.length;
 			}
-			if (TOAST_ENABLED) {
-				Toastify({
-					text: `Neue Strukturen geladen. Bilder: ${structureCount} - Pixels: ${pixelCount}.`,
-					duration: 10000
-				}).showToast();
-			}
+			
+      Toastify({
+        text: `Neue Strukturen geladen. Bilder: ${structureCount} - Pixels: ${pixelCount}.`,
+        duration: 10000
+      }).showToast();
+			
 			
 		}
 
