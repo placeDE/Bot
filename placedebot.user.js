@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PlaceDE Bot
 // @namespace    https://github.com/PlaceDE/Bot
-// @version      11
+// @version      12
 // @description  /r/place bot
 // @author       NoahvdAa, reckter, SgtChrome, nama17
 // @match        https://www.reddit.com/r/place/*
@@ -21,8 +21,10 @@ var placeOrders = [];
 var accessToken;
 var canvas = document.createElement('canvas');
 
-const VERSION = 11
+const VERSION = 12
 var UPDATE_PENDING = false;
+
+var DEFAULT_TOASTS_ENABLED = true;
 
 const COLOR_MAPPINGS = {
 	'#FF4500': 2,
@@ -57,6 +59,17 @@ const COLOR_MAPPINGS = {
 	Toastify({
 		text: 'Zugriffstoken eingesammelt!',
 		duration: 10000
+	}).showToast();
+	Toastify({
+		text: 'Klicke hier, um alle unbedenklichen Nachrichten zu unterdrücken (z.B. "Platziere Pixel", etc.)',
+		duration: -1,
+		close: true,
+		onClick: () => {
+			Toastify({
+				text: 'Unbedenkliche Nachrichten werden von nun an unterdrückt!'
+			}).showToast();
+			DEFAULT_TOASTS_ENABLED = false;
+		}
 	}).showToast();
 
 	setInterval(updateOrders, 5 * 60 * 1000); // Update orders elke vijf minuten.
@@ -109,10 +122,12 @@ async function attemptPlace() {
 		// Pixel already set
 		if (currentColorId == colorId) continue;
 
-		Toastify({
-			text: `Pixel wird gesetzt auf ${x}, ${y}...`,
-			duration: 10000
-		}).showToast();
+		if (DEFAULT_TOASTS_ENABLED) {
+			Toastify({
+				text: `Pixel wird gesetzt auf ${x}, ${y}...`,
+				duration: 10000
+			}).showToast();
+		}
 
 		const time = new Date().getTime();
 		let nextAvailablePixelTimestamp = await place(x, y, colorId) ?? new Date(time + 1000 * 60 * 5 + 1000 * 15)
@@ -127,18 +142,24 @@ async function attemptPlace() {
 
 		const minutes = Math.floor(waitFor / (1000 * 60))
 		const seconds = Math.floor((waitFor / 1000) % 60)
-		Toastify({
-			text: `Warten auf Abkühlzeit ${minutes}:${seconds} bis ${new Date(nextAvailablePixelTimestamp).toLocaleTimeString()}`,
-			duration: waitFor
-		}).showToast();
+
+		if (DEFAULT_TOASTS_ENABLED) {
+			Toastify({
+				text: `Warten auf Abkühlzeit ${minutes}:${seconds} bis ${new Date(nextAvailablePixelTimestamp).toLocaleTimeString()}`,
+				duration: waitFor
+			}).showToast();
+		}
+		
 		setTimeout(attemptPlace, waitFor);
 		return;
 	}
 
-	Toastify({
-		text: 'Alle bestellten Pixel haben bereits die richtige Farbe!',
-		duration: 10000
-	}).showToast();
+	if (DEFAULT_TOASTS_ENABLED) {
+		Toastify({
+			text: 'Alle bestellten Pixel haben bereits die richtige Farbe!',
+			duration: 10000
+		}).showToast();
+	}
 	setTimeout(attemptPlace, 30000); // probeer opnieuw in 30sec.
 }
 
@@ -153,10 +174,13 @@ function updateOrders() {
 			for (const structureName in data.structures) {
 				pixelCount += data.structures[structureName].pixels.length;
 			}
-			Toastify({
-				text: `Neue Strukturen geladen. Bilder: ${structureCount} - Pixels: ${pixelCount}.`,
-				duration: 10000
-			}).showToast();
+			if (DEFAULT_TOASTS_ENABLED) {
+				Toastify({
+					text: `Neue Strukturen geladen. Bilder: ${structureCount} - Pixels: ${pixelCount}.`,
+					duration: 10000
+				}).showToast();
+			}
+			
 		}
 
 		if (data?.version !== VERSION && !UPDATE_PENDING) {
