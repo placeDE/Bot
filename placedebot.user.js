@@ -63,14 +63,10 @@ const COLOR_MAPPINGS = {
 		}
 	}).showToast();
 	Toastify({
-		text: 'Abfrage des Zugriffstokens...',
-		duration: 10000
+		text: 'Stare den Bot...',
+		duration: 5000
 	}).showToast();
 	accessToken = await getAccessToken();
-	Toastify({
-		text: 'Zugriffstoken eingesammelt!',
-		duration: 10000
-	}).showToast();
 
 	setInterval(updateOrders, 5 * 60 * 1000); // Update orders elke vijf minuten.
 	await updateOrders();
