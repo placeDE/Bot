@@ -288,7 +288,7 @@ async function getAccessToken() {
 /**
  * 
  * @param {string} id 
- * @returns {string}
+ * @returns {Promise<string>}
  */
 async function getCurrentImageUrl(id = '0') {
 	return new Promise((resolve, reject) => {
