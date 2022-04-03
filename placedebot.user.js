@@ -68,7 +68,7 @@ const COLOR_MAPPINGS = {
 	}).showToast();
 
 	setInterval(updateOrders, 5 * 60 * 1000);	// Update orders every five minutes.
-	setInterval(reloadSite, 60 * 1000 * 60);	// refresh the site every hour, because reddit sometimes disconnects...
+	setTimeout(reloadSite, 60 * 1000 * 60);		// refresh the site every hour, because reddit sometimes disconnects...
 	await updateOrders();
 	attemptPlace();
 })();
