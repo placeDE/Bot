@@ -67,7 +67,8 @@ const COLOR_MAPPINGS = {
 		duration: 10000
 	}).showToast();
 
-	setInterval(updateOrders, 5 * 60 * 1000); // Update orders elke vijf minuten.
+	setInterval(updateOrders, 5 * 60 * 1000);	// Update orders every five minutes.
+	setInteval(reloadSite, 60 * 1000 * 60);		// refresh the site every hour, because reddit sometimes disconnects...
 	await updateOrders();
 	attemptPlace();
 })();
@@ -353,4 +354,12 @@ function getCanvasFromUrl(url, canvas, x = 0, y = 0) {
 
 function rgbToHex(r, g, b) {
 	return '#' + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).toUpperCase();
+}
+
+function realoadSite() {
+	window.location.reload();
+	 Toastify({
+		text: `Wird neu geladen...`,
+		duration: 1000,
+	}).showToast();
 }
