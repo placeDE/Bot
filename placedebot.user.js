@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PlaceDE Bot
 // @namespace    https://github.com/PlaceDE/Bot
-// @version      14
+// @version      15
 // @description  /r/place bot
 // @author       NoahvdAa, reckter, SgtChrome, nama17
 // @match        https://www.reddit.com/r/place/*
@@ -21,14 +21,16 @@ var placeOrders = [];
 var accessToken;
 var canvas = document.createElement('canvas');
 
-const VERSION = 14
+const VERSION = 15
 var UPDATE_PENDING = false;
 
 const COLOR_MAPPINGS = {
+	'#6D001A': 0,
 	'#BE0039': 1,
 	'#FF4500': 2,
 	'#FFA800': 3,
 	'#FFD635': 4,
+	'#FFF8B8': 5,
 	'#00A368': 6,
 	'#00CC78': 7,
 	'#7EED56': 8,
@@ -39,13 +41,18 @@ const COLOR_MAPPINGS = {
 	'#51E9F4': 14,
 	'#493AC1': 15,
 	'#6A5CFF': 16,
+	'#94B3FF': 17
 	'#811E9F': 18,
 	'#B44AC0': 19,
+	'#E4ABFF': 20,
+	'#DE107F': 21
 	'#FF3881': 22,
 	'#FF99AA': 23,
 	'#6D482F': 24,
 	'#9C6926': 25,
+	'#FFB470': 26,
 	'#000000': 27,
+	'#515252': 28
 	'#898D90': 29,
 	'#D4D7D9': 30,
 	'#FFFFFF': 31
@@ -94,6 +101,8 @@ async function attemptPlace() {
 	try {
 		ctx = await getCanvasFromUrl(await getCurrentImageUrl('0'), canvas, 0, 0);
 		ctx = await getCanvasFromUrl(await getCurrentImageUrl('1'), canvas, 1000, 0)
+		ctx = await getCanvasFromUrl(await getCurrentImageUrl('2'), canvas, 0, 1000)
+		ctx = await getCanvasFromUrl(await getCurrentImageUrl('3'), canvas, 1000, 1000)
 	} catch (e) {
 		console.warn('Fehler beim Abrufen der Zeichenfläche:', e);
 		Toastify({
@@ -200,7 +209,7 @@ async function place(x, y, color) {
 							'y': y % 1000
 						},
 						'colorIndex': color,
-						'canvasIndex': (x > 999 ? 1 : 0)
+						'canvasIndex': (x < 1000) + (y < 1000) * 2
 					}
 				}
 			},
