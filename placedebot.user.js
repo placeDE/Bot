@@ -68,7 +68,7 @@ const COLOR_MAPPINGS = {
 	}).showToast();
 
 	setInterval(updateOrders, 5 * 60 * 1000);	// Update orders every five minutes.
-	setInteval(reloadSite, 60 * 1000 * 60);		// refresh the site every hour, because reddit sometimes disconnects...
+	setInterval(reloadSite, 60 * 1000 * 60);	// refresh the site every hour, because reddit sometimes disconnects...
 	await updateOrders();
 	attemptPlace();
 })();
@@ -356,7 +356,7 @@ function rgbToHex(r, g, b) {
 	return '#' + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).toUpperCase();
 }
 
-function realoadSite() {
+function reloadSite() {
 	window.location.reload();
 	 Toastify({
 		text: `Wird neu geladen...`,
