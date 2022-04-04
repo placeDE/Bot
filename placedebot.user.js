@@ -28,9 +28,11 @@ let accessToken;
 let canvas = document.createElement('canvas');
 
 let ccConnection;
+
+let firstSuccess = true;
+
 let timeout;
-let idleTimeout;
-let onCooldown;
+let locked = false;
 
 (async function () {
 	GM_addStyle(GM_getResourceText('TOASTIFY_CSS'));
@@ -71,7 +73,7 @@ async function initServerConnection() {
 	ccConnection.onclose = function (close) {
 		Toaster.error('Verbindung zum Server unterbrochen! Verbinde neu in 10 Sekunden...')
 		Logger.log('WebSocket Close: '+ close.code);
-		if (close.code === 1006) {
+		if (firstSuccess && close.code === 1006) {
 			Toaster.error('Mögliches Problem mit deinem Adblocker etc.', 30000);
 		}
 
@@ -86,7 +88,8 @@ function processOperation(message) {
 	if (message.data === "{}") {
 		Toaster.success('Es sind alle Pixel platziert! Gute Arbeit :]', 30000);
 		Toaster.info('Versuche erneut in 30s...', 2000);
-		idleTimeout = setTimeout(() => setReady(), 30000);
+		locked = false;
+		tryReady(30000);
 		return;
 	}
 
@@ -102,7 +105,6 @@ function processOperation(message) {
 }
 
 async function processOperationPlacePixel(data) {
-	onCooldown = true;
 
 	const x = data.x;
 	const y = data.y;
@@ -122,26 +124,31 @@ async function processOperationPlacePixel(data) {
 	const minutes = Math.floor(waitFor / (1000 * 60))
 	const seconds = Math.floor((waitFor / 1000) % 60)
 	Toaster.warning(`Noch ${minutes}m ${seconds}s Abklingzeit bis ${new Date(nextAvailablePixelTimestamp).toLocaleTimeString()} Uhr`, waitFor);
-	timeout = setTimeout(setReady, waitFor);
+	firstSuccess = false;
+	locked = false;
+	tryReady(waitFor);
 }
 
 async function processOperationNotifyUpdate(data) {
 	Toaster.error(`Neue Script-Version verfügbar! Aktulaisiere unter ${UPDATE_URL}`);
 }
 
-function setReady() {
+function tryReady(delay) {
+	if (locked) return;
 	clearTimeout(timeout);
-	clearTimeout(idleTimeout);
-	onCooldown = false;
-	ccConnection.send(JSON.stringify({"operation":"request-pixel","user":"browser-script"}));
-	setTimeout(() => checkForIdle(), 60*1000);
+	timeout = setTimeout(setReady, delay);
 }
 
-function checkForIdle() {
-	// send new request if server didn't answer with job
-	if (!onCooldown) {
-		setReady();
-	}
+function setReady() {
+	locked = true;
+	ccConnection.send(JSON.stringify({"operation":"request-pixel","user":"browser-script"}));
+	setTimeout(checkBusy, 20000);
+}
+
+// Keep Alive
+function checkBusy() {
+	if (!locked) return;
+	void setReady();
 }
 
 function getCanvasId(x,y) {
