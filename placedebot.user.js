@@ -174,7 +174,7 @@ async function processOperationPlacePixel(data) {
 
 async function processOperationNotifyUpdate(data) {
 	Toastify({
-		text: `Neue Script-Version verfügbar! Aktulaisiere unter ${UPDATE_URL}`,
+		text: `Neue Script-Version verfügbar! Aktualisiere unter ${UPDATE_URL}`,
 		duration: 10000,
 		gravity: "bottom",
 		style: {
