@@ -17,6 +17,8 @@
 
 // Ignore that hideous code. But if it works, it works.
 
+const VERBOSE = false;
+
 const VERSION = 19;
 
 const PLACE_URL = 'https://gql-realtime-2.reddit.com/query';
@@ -27,6 +29,7 @@ let canvas = document.createElement('canvas');
 
 let ccConnection;
 let timeout;
+let idleTimeout;
 let onCooldown;
 
 (async function () {
@@ -63,11 +66,11 @@ async function initServerConnection() {
 	}
 	ccConnection.onerror = function (error) {
 		Toaster.error('Verbindung zum Server fehlgeschlagen!');
-		console.log('WebSocket Error: '+ error);
+		Logger.log('WebSocket Error: '+ error.code);
 	};
 	ccConnection.onclose = function (close) {
 		Toaster.error('Verbindung zum Server unterbrochen! Verbinde neu in 10 Sekunden...')
-		console.log('WebSocket Close: '+ close.code);
+		Logger.log('WebSocket Close: '+ close.code);
 		if (close.code === 1006) {
 			Toaster.error('Mögliches Problem mit deinem Adblocker etc.', 30000);
 		}
@@ -79,6 +82,14 @@ async function initServerConnection() {
 
 function processOperation(message) {
 	// console.log('WebSocket Message received: '+message.data);
+
+	if (message.data === "{}") {
+		Toaster.success('Es sind alle Pixel platziert! Gute Arbeit :]', 30000);
+		Toaster.info('Versuche erneut in 30s...', 2000);
+		idleTimeout = setTimeout(() => setReady(), 30000);
+		return;
+	}
+
 	const messageData = JSON.parse(message.data);
 	switch (messageData.operation) {
 		case 'place-pixel':
@@ -120,6 +131,7 @@ async function processOperationNotifyUpdate(data) {
 
 function setReady() {
 	clearTimeout(timeout);
+	clearTimeout(idleTimeout);
 	onCooldown = false;
 	ccConnection.send(JSON.stringify({"operation":"request-pixel","user":"browser-script"}));
 	setTimeout(() => checkForIdle(), 60*1000);
@@ -222,6 +234,7 @@ class Toaster {
 				background: '#92E234',
 			},
 		}).showToast();
+		Logger.log(msg, true);
 	}
 
 	static warning(msg, duration = 10000) {
@@ -233,6 +246,7 @@ class Toaster {
 				background: '#FF5700',
 			},
 		}).showToast();
+		Logger.log(msg, true);
 	}
 
 	static error(msg, duration = 10000) {
@@ -244,6 +258,7 @@ class Toaster {
 				background: '#ED001C',
 			},
 		}).showToast();
+		Logger.log(msg);
 	}
 
 	static info(msg, duration = 10000) {
@@ -256,5 +271,14 @@ class Toaster {
 				color: '#111'
 			},
 		}).showToast();
+		Logger.log(msg, true);
+	}
+}
+
+class Logger {
+
+	static log(msg, verbose = false) {
+		if (verbose && !VERBOSE) return;
+		console.log(msg);
 	}
 }
