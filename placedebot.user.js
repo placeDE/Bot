@@ -81,7 +81,7 @@ async function initServerConnection() {
 }
 
 function processOperation(message) {
-	// console.log('WebSocket Message received: '+message.data);
+	Logger.log(`RX: WebSocket Message: ${message.data}`, true);
 
 	if (message.data === "{}") {
 		Toaster.success('Es sind alle Pixel platziert! Gute Arbeit :]', 30000);
