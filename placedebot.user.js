@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PlaceDE Bot
 // @namespace    https://github.com/PlaceDE/Bot
-// @version      19
+// @version      20
 // @description  /r/place bot
 // @author       NoahvdAa, reckter, SgtChrome, nama17, Kronox
 // @match        https://www.reddit.com/r/place/*
@@ -19,7 +19,7 @@
 
 const VERBOSE = false;
 
-const VERSION = 19;
+const VERSION = 20;
 
 const PLACE_URL = 'https://gql-realtime-2.reddit.com/query';
 const UPDATE_URL = 'https://github.com/placeDE/Bot/raw/main/placedebot.user.js';
@@ -41,7 +41,7 @@ let locked = false;
 	canvas.height = 2000;
 	canvas = document.body.appendChild(canvas);
 
-	await new Promise(r => setTimeout(r, 1000));
+	await new Promise(r => setTimeout(r, 200));
 
 	await initToken();
 	initServerConnection();
@@ -142,7 +142,7 @@ function tryReady(delay) {
 function setReady() {
 	locked = true;
 	ccConnection.send(JSON.stringify({"operation":"request-pixel","user":"browser-script"}));
-	setTimeout(checkBusy, 20000);
+	//setTimeout(checkBusy, 20000);
 }
 
 // Keep Alive
