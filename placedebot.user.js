@@ -130,7 +130,7 @@ async function processOperationPlacePixel(data) {
 }
 
 async function processOperationNotifyUpdate(data) {
-	Toaster.error(`Neue Script-Version verfügbar! Aktulaisiere unter ${UPDATE_URL}`);
+	Toaster.error(`Neue Script-Version verfügbar! Aktualisiere unter ${UPDATE_URL}`);
 }
 
 function tryReady(delay) {
