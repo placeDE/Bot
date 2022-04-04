@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PlaceDE Bot
 // @namespace    https://github.com/PlaceDE/Bot
-// @version      18
+// @version      19
 // @description  /r/place bot
 // @author       NoahvdAa, reckter, SgtChrome, nama17, Kronox
 // @match        https://www.reddit.com/r/place/*
@@ -17,7 +17,7 @@
 
 // Ignore that hideous code. But if it works, it works.
 
-const VERSION = 18;
+const VERSION = 19;
 
 const PLACE_URL = 'https://gql-realtime-2.reddit.com/query';
 const UPDATE_URL = 'https://github.com/placeDE/Bot/raw/main/placedebot.user.js';
@@ -44,83 +44,32 @@ let onCooldown;
 
 async function initToken() {
 	// Create AccessToken
-	Toastify({
-		text: 'Frage Zugriffstokens an...',
-		duration: 10000,
-		gravity: "bottom",
-		style: {
-			background: '#C6C6C6',
-			color: '#111'
-		},
-	}).showToast();
+	Toaster.info('Frage Zugriffstokens an...');
 	accessToken = await getAccessToken();
-	Toastify({
-		text: 'Zugriffstoken erhalten!',
-		duration: 10000,
-		gravity: "bottom",
-		style: {
-			background: '#92E234',
-		},
-	}).showToast();
+	Toaster.success('Zugriffstoken erhalten!')
 }
 
 async function initServerConnection() {
 	// Establish connection to command&control server
-	Toastify({
-		text: 'Verbinde mit dem Kommando-Server...',
-		duration: 10000,
-		gravity: "bottom",
-		style: {
-			background: '#C6C6C6',
-			color: '#111'
-		},
-	}).showToast();
+	Toaster.info('Verbinde mit dem Kommando-Server...')
 
 	ccConnection = new WebSocket('wss://placede.ml');
 	ccConnection.onopen = function () {
-		Toastify({
-			text: 'Verbindung zum Server aufgebaut!',
-			duration: 10000,
-			gravity: "bottom",
-			style: {
-				background: '#92E234',
-			},
-		}).showToast();
+		Toaster.success('Verbindung zum Server aufgebaut!');
 
 		// handshake
 		ccConnection.send(JSON.stringify({"operation":"handshake","data":{"platform":"browser","version":VERSION,"useraccounts":1}}));
 		setReady()
 	}
 	ccConnection.onerror = function (error) {
-		Toastify({
-			text: 'Verbindung zum Server fehlgeschlagen!',
-			duration: 10000,
-			gravity: "bottom",
-			style: {
-				background: '#ED001C',
-			},
-		}).showToast();
+		Toaster.error('Verbindung zum Server fehlgeschlagen!');
 		console.log('WebSocket Error: '+ error);
 	};
 	ccConnection.onclose = function (close) {
-		Toastify({
-			text: 'Verbindung zum Server unterbrochen! Verbinde neu in 10 Sekunden...',
-			duration: 10000,
-			gravity: "bottom",
-			style: {
-				background: '#ED001C',
-			},
-		}).showToast();
+		Toaster.error('Verbindung zum Server unterbrochen! Verbinde neu in 10 Sekunden...')
 		console.log('WebSocket Close: '+ close.code);
 		if (close.code === 1006) {
-			Toastify({
-				text: 'Mögliches Problem mit deinem Adblocker etc.',
-				duration: 30000,
-				gravity: "bottom",
-				style: {
-					background: '#ED001C',
-				},
-			}).showToast();
+			Toaster.error('Mögliches Problem mit deinem Adblocker etc.', 30000);
 		}
 
 		setTimeout(() => initServerConnection(), 10*1000);
@@ -161,26 +110,12 @@ async function processOperationPlacePixel(data) {
 
 	const minutes = Math.floor(waitFor / (1000 * 60))
 	const seconds = Math.floor((waitFor / 1000) % 60)
-	Toastify({
-		text: `Noch ${minutes}m ${seconds}s Abklingzeit bis ${new Date(nextAvailablePixelTimestamp).toLocaleTimeString()} Uhr`,
-		duration: waitFor,
-		gravity: "bottom",
-		style: {
-			background: '#FF5700',
-		},
-	}).showToast();
+	Toaster.warning(`Noch ${minutes}m ${seconds}s Abklingzeit bis ${new Date(nextAvailablePixelTimestamp).toLocaleTimeString()} Uhr`, waitFor);
 	timeout = setTimeout(setReady, waitFor);
 }
 
 async function processOperationNotifyUpdate(data) {
-	Toastify({
-		text: `Neue Script-Version verfügbar! Aktulaisiere unter ${UPDATE_URL}`,
-		duration: 10000,
-		gravity: "bottom",
-		style: {
-			background: '#ED001C',
-		},
-	}).showToast();
+	Toaster.error(`Neue Script-Version verfügbar! Aktulaisiere unter ${UPDATE_URL}`);
 }
 
 function setReady() {
@@ -260,24 +195,10 @@ async function place(x, y, color) {
 	});
 	const data = await response.json()
 	if (data.errors !== undefined) {
-		Toastify({
-			text: 'Pixel konnte nicht plaziert werden, da du noch Abklingzeit hast...',
-			duration: 10000,
-			gravity: "bottom",
-			style: {
-				background: '#ED001C',
-			},
-		}).showToast();
+		Toaster.error('Pixel konnte nicht plaziert werden, da du noch Abklingzeit hast...', 4000)
 		return data.errors[0].extensions?.nextAvailablePixelTs
 	}
-	Toastify({
-		text: `Pixel gesetzt auf x:${x} y:${y}`,
-		duration: 10000,
-		gravity: "bottom",
-		style: {
-			background: '#92E234',
-		},
-	}).showToast();
+	Toaster.success(`Pixel gesetzt auf x:${x} y:${y}`)
 	return data?.data?.act?.data?.[0]?.data?.nextAvailablePixelTimestamp
 }
 
@@ -288,4 +209,52 @@ async function getAccessToken() {
 	const responseText = await response.text();
 
 	return responseText.match(/"accessToken"\s*:\s*"([\w-]+)"/)[1];
+}
+
+class Toaster {
+
+	static success(msg, duration = 10000) {
+		Toastify({
+			text: msg,
+			duration: duration,
+			gravity: "bottom",
+			style: {
+				background: '#92E234',
+			},
+		}).showToast();
+	}
+
+	static warning(msg, duration = 10000) {
+		Toastify({
+			text: msg,
+			duration: duration,
+			gravity: "bottom",
+			style: {
+				background: '#FF5700',
+			},
+		}).showToast();
+	}
+
+	static error(msg, duration = 10000) {
+		Toastify({
+			text: msg,
+			duration: duration,
+			gravity: "bottom",
+			style: {
+				background: '#ED001C',
+			},
+		}).showToast();
+	}
+
+	static info(msg, duration = 10000) {
+		Toastify({
+			text: msg,
+			duration: duration,
+			gravity: "bottom",
+			style: {
+				background: '#C6C6C6',
+				color: '#111'
+			},
+		}).showToast();
+	}
 }
